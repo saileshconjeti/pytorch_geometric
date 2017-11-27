@@ -11,4 +11,4 @@ from torch_geometric.datasets import Cuniform  # noqa
 path = os.path.dirname(os.path.realpath(__file__))
 path = os.path.join(path, '..', 'data', 'Cuniform')
 train_dataset = Cuniform(path, train=True)
-# test_dataset = Semantic3D(path, train=False)
+test_dataset = Cuniform(path, train=False)

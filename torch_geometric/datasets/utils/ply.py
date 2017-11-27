@@ -8,6 +8,7 @@ def read_ply(path):
     with open(path, 'rb') as f:
         plydata = PlyData.read(f)
 
+    # print(plydata)
     # Extract numpy arrays for vertices and faces.
     x = plydata['vertex']['x']
     y = plydata['vertex']['y']
@@ -21,4 +22,13 @@ def read_ply(path):
     vertices = torch.FloatTensor(vertices)
     faces = torch.LongTensor(faces)
 
-    return vertices, faces
+    red = plydata['vertex']['red'] != 0
+    green = (plydata['vertex']['green'] - red) != 0
+    blue = plydata['vertex']['blue'] != 0
+    green = 2 * green
+    blue = 3 * blue
+
+    target = red + green + blue
+    target = torch.LongTensor(target).byte()
+
+    return vertices, faces, target
