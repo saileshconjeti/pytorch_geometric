@@ -37,6 +37,10 @@ class Net(nn.Module):
         self.conv4 = SplineConv(64, 64, dim=3, kernel_size=5)
         self.conv5 = SplineConv(64, 64, dim=3, kernel_size=5)
         self.conv6 = SplineConv(64, 64, dim=3, kernel_size=5)
+        self.conv7 = SplineConv(64, 64, dim=3, kernel_size=5)
+        self.conv8 = SplineConv(64, 64, dim=3, kernel_size=5)
+        self.conv9 = SplineConv(64, 64, dim=3, kernel_size=5)
+        self.conv10 = SplineConv(64, 64, dim=3, kernel_size=5)
         self.lin1 = Lin(64, 128)
         self.lin2 = Lin(128, 4)
 
@@ -47,6 +51,10 @@ class Net(nn.Module):
         x = F.elu(self.conv4(adj, x))
         x = F.elu(self.conv5(adj, x))
         x = F.elu(self.conv6(adj, x))
+        x = F.elu(self.conv7(adj, x))
+        x = F.elu(self.conv8(adj, x))
+        x = F.elu(self.conv9(adj, x))
+        x = F.elu(self.conv10(adj, x))
         x = F.elu(self.lin1(x))
         x = F.dropout(x, training=self.training)
         x = self.lin2(x)
@@ -57,7 +65,7 @@ model = Net()
 if torch.cuda.is_available():
     model = model.cuda()
 
-optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
 
 
 def train(epoch):
@@ -81,15 +89,16 @@ def train(epoch):
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
+        print(loss.data[0])
 
 
-def test(epoch):
+def test(epoch, loader):
     model.eval()
 
     correct = 0
     total = 0
 
-    for data in test_loader:
+    for data in loader:
         adj, target = data['adj']['content'], data['target']
         input = torch.ones(target.size(0), 1)
 
@@ -101,9 +110,12 @@ def test(epoch):
         correct += pred.eq(target).cpu().sum()
         total += target.size(0)
 
-    print('Epoch:', epoch, 'Test Accuracy:', correct / total)
+    print('Epoch:', epoch, 'Accuracy:', correct / total)
 
 
 for epoch in range(1, 101):
     train(epoch)
-    test(epoch)
+    print('Train Validation:')
+    test(epoch, train_loader)
+    print('Test Validation:')
+    test(epoch, test_loader)
