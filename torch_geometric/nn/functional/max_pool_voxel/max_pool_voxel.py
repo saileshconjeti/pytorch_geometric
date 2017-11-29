@@ -30,8 +30,9 @@ class MaxPoolVoxel(Function):
         row, col = cluster[row], cluster[col]
         weight = self.adj._values()
         mask = row != col
-        row, col, weight = row[mask], col[mask], weight[mask]
+        row, col = row[mask], col[mask]
         index = torch.stack([row, col], dim=0)
+        weight = weight.new(row.size(0))
         size = torch.Size([self.K, self.K])
         adj = SparseTensor(index, weight, size)
 
